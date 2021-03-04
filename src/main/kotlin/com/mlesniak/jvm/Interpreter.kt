@@ -3,6 +3,18 @@ package com.mlesniak.jvm
 import java.util.*
 
 /**
+ * OperandValue contains values which are allowed on the operand stack.
+ *
+ * In a real implementation, you'll find references to static objects,
+ * strings, etc. here as well.
+ **/
+open class OperandValue {
+    data class IntValue(val value: Int) : OperandValue()
+    data class StringValue(val value: String) : OperandValue()
+}
+
+
+/**
  * Interpreter is an implementation of a JVM bytecode interpreter which barely suffices
  * to execute the JVM version of the famous FizzBuzz example.
  *
@@ -13,18 +25,13 @@ class Interpreter(private val classFile: ClassFile) {
     fun run() {
         val code = findEntryByteCode()
 
-        // We only have one frame:
+        // We only have one frame (and thus support only one method in our execution):
         //
         // "Each frame has its own array of local variables (§2.6.1), its own operand stack (§2.6.2),
         // and a reference to the run-time constant pool (§2.5.5) of the class of the current method."
         // (https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-2.html#jvms-2.6)
-        var localVariables = Array(5) { 0 }
-        var operandStack = Stack<Int>()
-
-        // We cheat here again: instead of creating an operand stack which allows to store different
-        // types of values (ints, floats, references to strings, ...) we remember these special values
-        // for function calls in this variable and parse them when we interpret invokevirtual.
-        var ldcValue: String = ""
+        var localVariables = Array(2) { 0 }
+        var operandStack = Stack<OperandValue>()
 
         // We skip the first 8 bytes: Parsing the .class file seems correct, but
         // according to 'javap -p' the actual instructions start at the 8th byte.
@@ -37,19 +44,19 @@ class Interpreter(private val classFile: ClassFile) {
             when (opcode) {
                 // iconst_1
                 0x04 -> {
-                    operandStack.push(1)
+                    operandStack.push(OperandValue.IntValue(1))
                     pc++
                 }
 
                 // iconst_3
                 0x06 -> {
-                    operandStack.push(3)
+                    operandStack.push(OperandValue.IntValue(3))
                     pc++
                 }
 
                 // iconst_5
                 0x08 -> {
-                    operandStack.push(5)
+                    operandStack.push(OperandValue.IntValue(5))
                     pc++
                 }
 
@@ -64,35 +71,34 @@ class Interpreter(private val classFile: ClassFile) {
                     if (sval !is ConstantPoolEntry.String) {
                         throw java.lang.IllegalStateException("Constant pool value at $index is not of type String")
                     }
-                    ldcValue = sval.value
-                    operandStack.push(Integer.MIN_VALUE)
+                    operandStack.push(OperandValue.StringValue(sval.value))
                     pc += 2
                 }
 
                 // istore_1
                 0x3C -> {
-                    localVariables[1] = operandStack.pop()!!
+                    localVariables[1] = (operandStack.pop() as OperandValue.IntValue).value
                     pc++
                 }
 
                 // iload_1
                 0x1B -> {
-                    operandStack.push(localVariables[1])
+                    operandStack.push(OperandValue.IntValue(localVariables[1]))
                     pc++
                 }
 
                 // bipush
                 0x10 -> {
-                    operandStack.push(code[pc + 1].toInt())
+                    operandStack.push(OperandValue.IntValue(code[pc + 1].toInt()))
                     pc += 2
                 }
 
                 // irem
                 0x70 -> {
-                    val a2 = operandStack.pop()
-                    val a1 = operandStack.pop()
+                    val a2 = (operandStack.pop() as OperandValue.IntValue).value
+                    val a1 = (operandStack.pop() as OperandValue.IntValue).value
                     val res = a1 - (a1 / a2) * a2
-                    operandStack.push(res)
+                    operandStack.push(OperandValue.IntValue(res))
                     pc++
                 }
 
@@ -106,7 +112,7 @@ class Interpreter(private val classFile: ClassFile) {
 
                 // ifne
                 0x9A -> {
-                    val n = operandStack.pop()
+                    val n = (operandStack.pop() as OperandValue.IntValue).value
                     pc +=
                         if (n != 0) {
                             (code[pc + 1].toInt() and 0xFF shl 8) + code[pc + 2].toInt() and 0xFF
@@ -117,8 +123,8 @@ class Interpreter(private val classFile: ClassFile) {
 
                 // if_icmpgt
                 0xA3 -> {
-                    val a2 = operandStack.pop()
-                    val a1 = operandStack.pop()
+                    val a2 = (operandStack.pop() as OperandValue.IntValue).value
+                    val a1 = (operandStack.pop() as OperandValue.IntValue).value
                     pc +=
                         if (a1 > a2) {
                             (code[pc + 1].toInt() and 0xFF shl 8) + code[pc + 2].toInt() and 0xFF
@@ -139,10 +145,11 @@ class Interpreter(private val classFile: ClassFile) {
 
                 // getstatic
                 //
-                // We cheat here (a bit): since the only function we are actually calling is System.out.println
-                // we do not need to look in the constant pool, load the object reference in the operand stack, etc.
+                // We cheat here (a bit): since the only function we are actually calling is System.out.println with
+                // different signatures due to method overloading, we do not need to look in the constant pool, load the
+                // object reference in the operand stack, etc.
                 0xB2 -> {
-                    operandStack.push(Int.MIN_VALUE)
+                    operandStack.push(OperandValue.IntValue(Int.MIN_VALUE))
                     pc += 3
                 }
 
@@ -158,16 +165,16 @@ class Interpreter(private val classFile: ClassFile) {
 
                     when (name) {
                         "java/io/PrintStream.println:(I)V" -> {
-                            val num = operandStack.pop()
-                            // Discard the non-existing object reference
+                            val num = (operandStack.pop() as OperandValue.IntValue).value
+                            // Discard the non-existing object reference from getstatic
                             operandStack.pop()
                             println(num)
                         }
                         "java/io/PrintStream.println:(Ljava/lang/String;)V" -> {
-                            // Discard the non-existing object references from ldc and getstatic
+                            val sval = (operandStack.pop() as OperandValue.StringValue).value
+                            // Discard the non-existing object references from getstatic
                             operandStack.pop()
-                            operandStack.pop()
-                            println(ldcValue)
+                            println(sval)
                         }
                         else -> {
                             throw IllegalArgumentException("Unknown method invocation pc=${pc - 8} name=$name")
