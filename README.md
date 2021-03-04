@@ -61,7 +61,54 @@ and run the interpreter with
 A lot. Anything outside the scope of the trivial FizzBuzz example will not work, i.e. no other methods, no function calls, no additional local variables. Nevertheless, it was
 a great learning experience to peek under the hood of the JVM's classfile loading, the bytecode instruction set, and execution structure.
 
-## Java Compiler does not check i%3==0 twice! 
+Or, to state it otherwise: this implementation is able to execute the following instruction set
+
+    $ javap -c -p -s -constants fizz-buzz/Main.class
+      <... ommitted ...>
+      public static void main(java.lang.String[]);
+        descriptor: ([Ljava/lang/String;)V
+        Code:
+           0: iconst_1
+           1: istore_1
+           2: iload_1
+           3: bipush        100
+           5: if_icmpgt     78
+           8: iload_1
+           9: iconst_3
+          10: irem
+          11: ifne          31
+          14: iload_1
+          15: iconst_5
+          16: irem
+          17: ifne          31
+          20: getstatic     #7                  // Field java/lang/System.out:Ljava/io/PrintStream;
+          23: ldc           #13                 // String FizzBuzz
+          25: invokevirtual #15                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+          28: goto          72
+          31: iload_1
+          32: iconst_3
+          33: irem
+          34: ifne          48
+          37: getstatic     #7                  // Field java/lang/System.out:Ljava/io/PrintStream;
+          40: ldc           #21                 // String Fizz
+          42: invokevirtual #15                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+          45: goto          72
+          48: iload_1
+          49: iconst_5
+          50: irem
+          51: ifne          65
+          54: getstatic     #7                  // Field java/lang/System.out:Ljava/io/PrintStream;
+          57: ldc           #23                 // String Buzz
+          59: invokevirtual #15                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+          62: goto          72
+          65: getstatic     #7                  // Field java/lang/System.out:Ljava/io/PrintStream;
+          68: iload_1
+          69: invokevirtual #25                 // Method java/io/PrintStream.println:(I)V
+          72: iinc          1, 1
+          75: goto          2
+          78: return
+    }
+
 
 ## Resources
 
