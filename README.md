@@ -117,6 +117,6 @@ Or, to state it otherwise: this implementation is able to execute the following 
 
 ## Resources
 
-- (Official class file layout)[https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html]
-- (Class file layout)[https://en.wikipedia.org/wiki/Java_class_file#General_layout]
-- (JVM instruction set)[https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-6.html]
+- [Official class file layout](https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html)
+- [Class file layout](https://en.wikipedia.org/wiki/Java_class_file#General_layout)
+- [JVM instruction set](https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-6.html)
