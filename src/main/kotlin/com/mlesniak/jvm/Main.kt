@@ -9,13 +9,17 @@ class Main {
         val bytes = Files.readAllBytes(path)
         Utils.printBytes(bytes)
 
-        val cf = ClassFile(bytes)
-        cf.debug()
+        val classFile = ClassFile(bytes)
+        classFile.debug()
+
+        val jvm = Interpreter(classFile)
+        jvm.run()
     }
 }
 
 fun main(args: Array<String>) {
     Main().main(args)
 }
+
 
 

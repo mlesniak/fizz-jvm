@@ -190,5 +190,14 @@ class ClassFile {
         minorVersion = readU2(bytes, 4)
         majorVersion = readU2(bytes, 6)
     }
+
+    fun name(index: Int): String? {
+        val fieldName = constantPool[index]
+        if (fieldName !is ConstantPoolEntry.String) {
+            return null
+        }
+
+        return fieldName.value
+    }
 }
 
