@@ -112,9 +112,8 @@ class ClassFile {
     }
 
     private fun readVersion(bytes: ByteArray) {
-        // TODO(mlesniak) Refactoring
-        minorVersion = (bytes[4].toInt() shl 8) + bytes[5]
-        majorVersion = (bytes[6].toInt() shl 8) + bytes[7].toInt()
+        minorVersion = readU2(bytes, 4)
+        majorVersion = readU2(bytes, 6)
     }
 }
 
