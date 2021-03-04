@@ -1,15 +1,8 @@
 package com.mlesniak.jvm
 
-import java.nio.file.Files
-import java.nio.file.Path
-
 class Main {
     fun main(args: Array<String>) {
-        val path = Path.of("fizz-buzz/Main.class")
-        val bytes = Files.readAllBytes(path)
-        Utils.printBytes(bytes)
-
-        val classFile = ClassFile(bytes)
+        val classFile = ClassFile("fizz-buzz/Main.class")
         classFile.debug()
 
         val jvm = Interpreter(classFile)

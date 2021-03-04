@@ -1,6 +1,8 @@
 package com.mlesniak.jvm
 
 import java.nio.charset.Charset
+import java.nio.file.Files
+import java.nio.file.Path
 
 open class ConstantPoolEntry {
     data class String(val value: kotlin.String) : ConstantPoolEntry()
@@ -25,14 +27,22 @@ class Attribute(val nameIndex: Int, val data: ByteArray) {
 class ClassFile {
     var majorVersion: Int = 0
     var minorVersion: Int = 0
+
     var numConstPool: Int = 0
     lateinit var constantPool: List<ConstantPoolEntry>
 
     var numFields: Int = 0
     lateinit var fields: List<Field>
 
-    constructor(bytes: ByteArray) {
+    constructor(filename: String) {
+        val path = Path.of(filename)
+        val bytes = Files.readAllBytes(path)
+        // For debugging:
+        Utils.printBytes(bytes)
+        parse(bytes)
+    }
 
+    private fun parse(bytes: ByteArray) {
         readVersion(bytes)
         val cpSize = readConstantPool(bytes)
 
@@ -96,8 +106,11 @@ class ClassFile {
             println("  % 4d\t${constantPool[i]}".format(i))
         }
 
-        println("Methods:")
+        println("Static methods:")
         println("  numMethods=$numFields")
+        for (field in fields) {
+            println("  method %s".format(name(field.nameIndex)))
+        }
     }
 
     private fun readConstantPool(bytes: ByteArray): Int {

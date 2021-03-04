@@ -32,5 +32,4 @@ class Interpreter(val classFile: ClassFile) {
 
         throw IllegalStateException("No main method found in class file?")
     }
-
 }
