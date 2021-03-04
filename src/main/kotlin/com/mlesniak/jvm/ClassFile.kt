@@ -70,8 +70,6 @@ class ClassFile {
         val fs = mutableListOf<Field>()
         var pos = curPos + 2
         for (i in 0 until numFields) {
-
-            val accessFlags = readU2(bytes, pos)
             val nameIndex = readU2(bytes, pos + 2)
             val descriptorIndex = readU2(bytes, pos + 4)
             val attributesCount = readU2(bytes, pos + 6)
@@ -80,9 +78,9 @@ class ClassFile {
             val attributes = mutableListOf<Attribute>()
             var attrPos = pos + 8
             for (attr in 0 until attributesCount) {
-                val nameIndex = readU2(bytes, attrPos)
+                val attrNameIndex = readU2(bytes, attrPos)
                 val attrLength = readU4(bytes, attrPos + 2)
-                attributes.add(Attribute(nameIndex, bytes.copyOfRange(attrPos + 6, attrPos + 6 + attrLength)))
+                attributes.add(Attribute(attrNameIndex, bytes.copyOfRange(attrPos + 6, attrPos + 6 + attrLength)))
                 attrPos += 6 + attrLength
             }
 
@@ -137,15 +135,15 @@ class ClassFile {
                 // Class reference.
                 7 -> {
                     // Class reference: an index within the constant pool to a UTF-8 string containing the fully qualified class name (in internal format) (big-endian)
-                    val index = readU2(bytes, pos)
-                    cp.add(ConstantPoolEntry.ClassReference(index))
+                    val classIndex = readU2(bytes, pos)
+                    cp.add(ConstantPoolEntry.ClassReference(classIndex))
                     pos += 2
                 }
                 // String reference
                 8 -> {
                     // String reference: an index within the constant pool to a UTF-8 string (big-endian too)
-                    val index = readU2(bytes, pos)
-                    cp.add(ConstantPoolEntry.StringReference(index))
+                    val stringIndex = readU2(bytes, pos)
+                    cp.add(ConstantPoolEntry.StringReference(stringIndex))
                     pos += 2
                 }
                 // Field reference
