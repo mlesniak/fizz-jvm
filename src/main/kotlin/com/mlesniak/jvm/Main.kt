@@ -7,8 +7,11 @@ class Main {
     fun main(args: Array<String>) {
         val path = Path.of("fizz-buzz/Main.class")
         val bytes = Files.readAllBytes(path)
-
         Utils.printBytes(bytes)
+
+        val cf = ClassFile(bytes)
+        println(cf.minorVersion)
+        println(cf.majorVersion)
     }
 }
 
