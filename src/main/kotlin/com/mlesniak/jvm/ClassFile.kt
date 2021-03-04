@@ -13,22 +13,23 @@ open class ConstantPoolEntry {
     data class Descriptor(val nameIndex: Int, val typeIndex: Int) : ConstantPoolEntry()
 }
 
-class Method {
-
-}
-
-// TODO(mlesniak) Replace nameIndex with actual string values
 data class Field(val nameIndex: Int, val descriptorIndex: Int, val attributes: List<Attribute>)
+data class Attribute(val nameIndex: Int, val data: ByteArray)
 
-class Attribute(val nameIndex: Int, val data: ByteArray) {
-
-}
-
+/**
+ * ClassFile contains the basic logic to parse a class file and extract all necessary information to execute
+ * a single static method.
+ *
+ * Note that we do not support loading method definitions, since loading static methods (equal to fields in the
+ * class file definition) was enough to execute Fizzbuzz.
+ **/
 class ClassFile {
     var majorVersion: Int = 0
     var minorVersion: Int = 0
 
     var numConstPool: Int = 0
+    // Since we have a lot of index'ed access it's way more performant to have an array instead
+    // a list. But for our toy example, this suffices totally.
     lateinit var constantPool: List<ConstantPoolEntry>
 
     var numFields: Int = 0
@@ -92,6 +93,9 @@ class ClassFile {
     }
 
 
+    /**
+     * Show basic information about the loaded class file.
+     **/
     fun debug() {
         println("Version")
         println("  major=$majorVersion")
@@ -177,7 +181,6 @@ class ClassFile {
             }
         }
 
-        // TODO(mlesniak) Should this be an actual array for performance instead of a list?
         constantPool = cp
         return pos - constPoolIndex
     }
