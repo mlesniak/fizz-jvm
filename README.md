@@ -1,7 +1,7 @@
 # Overview
 
-While showing your basic programming skills by implementing [FizzBuzz](https://en.wikipedia.org/wiki/Fizz_buzz) is nice, I thought *Let's bring it to the next level*. In this repository you'll find a functional JVM implementation which
-is able to interpret the class file produced by `javac` from the following source code, i.e.
+While showing your basic programming skills by implementing [FizzBuzz](https://en.wikipedia.org/wiki/Fizz_buzz) is nice, I thought *Let's bring it to the next level*. In this repository you'll find a **functional (but very basic) JVM implementation** which
+is able to interpret (run) the class file produced by `javac` from the following source code, i.e.
 
     $ cat fizz-buzz/Main.java 
     public class Main {
@@ -64,7 +64,7 @@ and run the interpreter with
 ## Limitations
 
 A lot. Anything outside the scope of the trivial FizzBuzz example will not work, i.e. no other methods, no function calls, no additional local variables. Nevertheless, it was
-a great learning experience to peek under the hood of the JVM's classfile loading, the bytecode instruction set, and execution structure.
+a **great learning experience** to peek under the hood of the JVM's classfile loading, the bytecode instruction set, and execution structure.
 
 Or, to state it otherwise: this implementation is able to execute the following instruction set
 
