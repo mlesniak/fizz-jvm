@@ -12,6 +12,7 @@ class Main {
         val cf = ClassFile(bytes)
         println(cf.minorVersion)
         println(cf.majorVersion)
+        println(cf.numConstPool)
     }
 }
 
