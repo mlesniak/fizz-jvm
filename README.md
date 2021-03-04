@@ -3,6 +3,7 @@
 - Understand class file
 - Be able to read a class file
 - "Simulate execution"
+- Java Compiler does not check i%3==0 twice!
 
 ## Resources
 

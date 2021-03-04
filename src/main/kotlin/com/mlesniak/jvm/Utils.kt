@@ -37,3 +37,6 @@ object Utils {
         }
     }
 }
+
+// TODO(mlesniak) Document me
+fun ByteArray.getInt(index: Int): Int = this[index].toInt() and 0xFF

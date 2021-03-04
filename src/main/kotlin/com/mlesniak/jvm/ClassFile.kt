@@ -83,7 +83,7 @@ class ClassFile {
             var attrPos = pos + 8
             for (attr in 0 until attributesCount) {
                 val nameIndex = readU2(bytes, attrPos)
-                val attrLength = readU4(bytes, attrPos + 2) // 412
+                val attrLength = readU4(bytes, attrPos + 2)
                 attributes.add(Attribute(nameIndex, bytes.copyOfRange(attrPos + 6, attrPos + 6 + attrLength)))
                 attrPos += 6 + attrLength
             }
