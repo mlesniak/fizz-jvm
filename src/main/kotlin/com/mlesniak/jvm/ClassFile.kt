@@ -16,21 +16,52 @@ class ClassFile {
     var minorVersion: Int = 0
     var numConstPool: Int = 0
     lateinit var constantPool: List<ConstantPoolEntry>
+    var numMethods: Int = 0
 
+    // TODO(mlesniak) Shall we convert it to an IntArray before?
     constructor(bytes: ByteArray) {
-        // TODO(mlesniak) Shall we convert it to an IntArray before?
+
         readVersion(bytes)
-        readConstantPool(bytes)
+        val cpSize = readConstantPool(bytes)
+
+        // We can ignore all other fields for FizzBuzz, e.g. access flags, interface definitions, ...
+        // (at least until we actually need them).
+        //
+        //      cp_info        constant_pool[constant_pool_count-1]; <--- WE ARE HERE
+        //      u2             access_flags;
+        //      u2             this_class;
+        //      u2             super_class;
+        //      u2             interfaces_count;
+        //      u2             interfaces[interfaces_count];
+        //      u2             fields_count;
+        //      field_info     fields[fields_count];
+        //      u2             methods_count;                        <--- INTERESTED IN THIS
+        val methodCountPos = cpSize + 10 + 2 + 2 + 2 + 2 + + 2
+
+        // Constructor and actual main method
+        readMethods(bytes, methodCountPos)
     }
+
+    private fun readMethods(bytes: ByteArray, curPos: Int) {
+        numMethods = readU2(bytes, curPos)
+    }
+
 
     fun debug() {
-        println("major=$majorVersion minor=$minorVersion")
+        println("Version")
+        println("  major=$majorVersion")
+        println("  major=$minorVersion")
+
+        println("Constant Pool:")
         for (i in 1 until constantPool.size) {
-            println("%04d ${constantPool[i]}".format(i))
+            println("  % 4d\t${constantPool[i]}".format(i))
         }
+
+        println("Methods:")
+        println("  numMethods=$numMethods")
     }
 
-    private fun readConstantPool(bytes: ByteArray) {
+    private fun readConstantPool(bytes: ByteArray): Int {
         numConstPool = readU2(bytes, 8)
         val cp = mutableListOf<ConstantPoolEntry>()
         // Constant Pool start at 1, prevent subtracting one on each reference
@@ -100,6 +131,7 @@ class ClassFile {
 
         // TODO(mlesniak) Should this be an actual array for performance instead of a list?
         constantPool = cp
+        return pos - 10
     }
 
     private fun readU2(bytes: ByteArray, start: Int): Int {
