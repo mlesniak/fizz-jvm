@@ -32,7 +32,7 @@ object Utils {
             }
         }
 
-        if (hex.isNotEmpty()) {
+        if (hex.isNotEmpty() && bytes.size % 8 != 0) {
             println(hex.toString())
         }
     }
