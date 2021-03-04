@@ -10,9 +10,7 @@ class Main {
         Utils.printBytes(bytes)
 
         val cf = ClassFile(bytes)
-        println(cf.minorVersion)
-        println(cf.majorVersion)
-        println(cf.numConstPool)
+        cf.debug()
     }
 }
 

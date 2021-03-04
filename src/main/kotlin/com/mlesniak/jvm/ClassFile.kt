@@ -4,11 +4,11 @@ import java.nio.charset.Charset
 
 open class ConstantPoolEntry {
     data class String(val value: kotlin.String) : ConstantPoolEntry()
-    data class ClassReference(val value: Int) : ConstantPoolEntry()
-    data class StringReference(val value: Int) : ConstantPoolEntry()
-    data class FieldReference(val classIndex: Int, val nameAndTypeIndex: Int) : ConstantPoolEntry()
-    data class MethodReference(val classIndex: Int, val nameAndTypeIndex: Int) : ConstantPoolEntry()
-    data class NameAndTypeDescriptor(val nameIndex: Int, val typeIndex: Int) : ConstantPoolEntry()
+    data class ClassReference(val index: Int) : ConstantPoolEntry()
+    data class StringReference(val index: Int) : ConstantPoolEntry()
+    data class FieldReference(val classIndex: Int, val descriptorIndex: Int) : ConstantPoolEntry()
+    data class MethodReference(val classIndex: Int, val descriptorIndex: Int) : ConstantPoolEntry()
+    data class Descriptor(val nameIndex: Int, val typeIndex: Int) : ConstantPoolEntry()
 }
 
 class ClassFile {
@@ -21,7 +21,13 @@ class ClassFile {
         // TODO(mlesniak) Shall we convert it to an IntArray before?
         readVersion(bytes)
         readConstantPool(bytes)
-        println("breakpoint")
+    }
+
+    fun debug() {
+        println("major=$majorVersion minor=$minorVersion")
+        for (i in 1 until constantPool.size) {
+            println("%04d ${constantPool[i]}".format(i))
+        }
     }
 
     private fun readConstantPool(bytes: ByteArray) {
@@ -43,8 +49,8 @@ class ClassFile {
                     // follows (which may be different than the number of characters). Note that the encoding used is not actually UTF-8, but involves a slight modification of
                     // the Unicode standard encoding form.
                     val length = readU2(bytes, pos)
-                    val strValue = readString(bytes, pos + 2, length)
-                    cp.add(ConstantPoolEntry.String(strValue))
+                    val value = readString(bytes, pos + 2, length)
+                    cp.add(ConstantPoolEntry.String(value))
                     pos += 2 + length
                 }
                 // Class reference.
@@ -65,16 +71,16 @@ class ClassFile {
                 9 -> {
                     // Field reference: two indexes within the constant pool, the first pointing to a Class reference, the second to a Name and Type descriptor. (big-endian)
                     val classIndex = readU2(bytes, pos)
-                    val nameAndTypeIndex = readU2(bytes, pos + 2)
-                    cp.add(ConstantPoolEntry.FieldReference(classIndex, nameAndTypeIndex))
+                    val descriptorIndex = readU2(bytes, pos + 2)
+                    cp.add(ConstantPoolEntry.FieldReference(classIndex, descriptorIndex))
                     pos += 4
                 }
                 // Method reference.
                 10 -> {
                     // Method reference: two indexes within the constant pool, the first pointing to a Class reference, the second to a Name and Type descriptor. (big-endian)
                     val classIndex = readU2(bytes, pos)
-                    val nameAndTypeIndex = readU2(bytes, pos + 2)
-                    cp.add(ConstantPoolEntry.MethodReference(classIndex, nameAndTypeIndex))
+                    val descriptorIndex = readU2(bytes, pos + 2)
+                    cp.add(ConstantPoolEntry.MethodReference(classIndex, descriptorIndex))
                     pos += 4
                 }
                 // Name and type descriptor
@@ -83,7 +89,7 @@ class ClassFile {
                     // encoded type descriptor.
                     val nameIndex = readU2(bytes, pos)
                     val typeIndex = readU2(bytes, pos + 2)
-                    cp.add(ConstantPoolEntry.NameAndTypeDescriptor(nameIndex, typeIndex))
+                    cp.add(ConstantPoolEntry.Descriptor(nameIndex, typeIndex))
                     pos += 4
                 }
 
