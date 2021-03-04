@@ -38,5 +38,7 @@ object Utils {
     }
 }
 
-// TODO(mlesniak) Document me
+/**
+ * getInt returns the unsigned int value of a value in a byte array.
+ **/
 fun ByteArray.getInt(index: Int): Int = this[index].toInt() and 0xFF

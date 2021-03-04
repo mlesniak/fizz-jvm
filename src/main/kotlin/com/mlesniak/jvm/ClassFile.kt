@@ -37,8 +37,6 @@ class ClassFile {
     constructor(filename: String) {
         val path = Path.of(filename)
         val bytes = Files.readAllBytes(path)
-        // For debugging:
-        Utils.printBytes(bytes)
         parse(bytes)
     }
 

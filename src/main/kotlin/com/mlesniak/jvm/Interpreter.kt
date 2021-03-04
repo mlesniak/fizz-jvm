@@ -2,9 +2,16 @@ package com.mlesniak.jvm
 
 import java.util.*
 
+/**
+ * Interpreter is an implementation of a JVM bytecode interpreter which barely suffices
+ * to execute the JVM version of the famous FizzBuzz example.
+ *
+ * It won't work if you use any other methods than System.out.println, other complex math
+ * operations, ..., or, to summarize: if you do something non-fizz-buzzy.
+ **/
 class Interpreter(private val classFile: ClassFile) {
     fun run() {
-        val code = findMainBytecode()
+        val code = findEntryByteCode()
 
         // We only have one frame:
         //
@@ -193,9 +200,14 @@ class Interpreter(private val classFile: ClassFile) {
         return "${className.value}.${name.value}:${type.value}"
     }
 
-    private fun findMainBytecode(): ByteArray {
-        // Note that we do not check for the correct signature, access modifiers, etc. but
-        // only look for the correct method name.
+    /**
+     * findEntryByteCode searches the class file for a method 'main' and returns
+     * its corresponding bytecode.
+     *
+     * Note that we do not check for the correct signature, access modifiers, etc.
+     * but only look for the correct method name.
+     **/
+    private fun findEntryByteCode(): ByteArray {
         for (field in classFile.fields) {
             val name = classFile.name(field.nameIndex) ?: continue
             if (name != "main") {
