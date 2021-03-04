@@ -46,6 +46,11 @@ is able to interpret the class file produced by `javac` from the following sourc
     19
     ...
 
+## Approach
+
+After understanding the class file format and loading the class file and bytecode, I set the program counter for the instruction set to 0, wrote an empty `when` statement with a default branch throwing an 
+error about an unknown opcode and implemented all opcodes until the example ran without errors.
+
 ## How to build
 
 You need to have Gradle and Kotlin installed. Compile everything with
