@@ -13,7 +13,7 @@ object Utils {
             if (ip % 8 == 0) {
                 hex.clear()
                 values.clear()
-                hex.append(String.format("%04X\t", ip))
+                hex.append(String.format("%04d\t", ip))
             }
 
             val s = String.format("%02X ", b)

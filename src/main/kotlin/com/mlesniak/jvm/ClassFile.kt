@@ -11,14 +11,26 @@ open class ConstantPoolEntry {
     data class Descriptor(val nameIndex: Int, val typeIndex: Int) : ConstantPoolEntry()
 }
 
+class Method {
+
+}
+
+// TODO(mlesniak) Replace nameIndex with actual string values
+data class Field(val nameIndex: Int, val descriptorIndex: Int, val attributes: List<Attribute>)
+
+class Attribute(val nameIndex: Int, val data: ByteArray) {
+
+}
+
 class ClassFile {
     var majorVersion: Int = 0
     var minorVersion: Int = 0
     var numConstPool: Int = 0
     lateinit var constantPool: List<ConstantPoolEntry>
-    var numMethods: Int = 0
 
-    // TODO(mlesniak) Shall we convert it to an IntArray before?
+    var numFields: Int = 0
+    lateinit var fields: List<Field>
+
     constructor(bytes: ByteArray) {
 
         readVersion(bytes)
@@ -36,14 +48,41 @@ class ClassFile {
         //      u2             fields_count;
         //      field_info     fields[fields_count];
         //      u2             methods_count;                        <--- INTERESTED IN THIS
-        val methodCountPos = cpSize + 10 + 2 + 2 + 2 + 2 + + 2
+        val afterCP = cpSize + 10
+        val fieldCountPos = afterCP + 2 + 2 + 2 + 2 + 2
 
-        // Constructor and actual main method
-        readMethods(bytes, methodCountPos)
+        // The actual code is in fields, since the FizzBuzz code is in a static
+        // method and not a method from the Main class.
+        readFields(bytes, fieldCountPos)
     }
 
-    private fun readMethods(bytes: ByteArray, curPos: Int) {
-        numMethods = readU2(bytes, curPos)
+    private fun readFields(bytes: ByteArray, curPos: Int) {
+        numFields = readU2(bytes, curPos)
+
+        val fs = mutableListOf<Field>()
+        var pos = curPos + 2
+        for (i in 0 until numFields) {
+
+            val accessFlags = readU2(bytes, pos)
+            val nameIndex = readU2(bytes, pos + 2)
+            val descriptorIndex = readU2(bytes, pos + 4)
+            val attributesCount = readU2(bytes, pos + 6)
+
+            // Code value of attribute contains actual bytecode.
+            val attributes = mutableListOf<Attribute>()
+            var attrPos = pos + 8
+            for (attr in 0 until attributesCount) {
+                val nameIndex = readU2(bytes, attrPos)
+                val attrLength = readU4(bytes, attrPos + 2) // 412
+                attributes.add(Attribute(nameIndex, bytes.copyOfRange(attrPos + 6, attrPos + 6 + attrLength)))
+                attrPos += 6 + attrLength
+            }
+
+            pos = attrPos
+            fs.add(Field(nameIndex, descriptorIndex, attributes))
+        }
+
+        fields = fs
     }
 
 
@@ -58,7 +97,7 @@ class ClassFile {
         }
 
         println("Methods:")
-        println("  numMethods=$numMethods")
+        println("  numMethods=$numFields")
     }
 
     private fun readConstantPool(bytes: ByteArray): Int {
@@ -125,17 +164,21 @@ class ClassFile {
                 }
 
                 else ->
-                    throw IllegalStateException("Unknown tag ${tag.toInt()}")
+                    throw IllegalStateException("Unknown tag ${tag.toInt()} at position $pos")
             }
         }
 
         // TODO(mlesniak) Should this be an actual array for performance instead of a list?
         constantPool = cp
-        return pos - 10
+        return pos - constPoolIndex
     }
 
     private fun readU2(bytes: ByteArray, start: Int): Int {
-        return (bytes[start].toInt() shl 8) + bytes[start + 1]
+        return (bytes[start].toInt() and 0xFF shl 8) + (bytes[start + 1].toInt() and 0xFF)
+    }
+
+    private fun readU4(bytes: ByteArray, start: Int): Int {
+        return (bytes[start].toInt() and 0xFF shl 24) + (bytes[start + 1].toInt() and 0xFF shl 16) + (bytes[start + 2].toInt() and 0xFF shl 8) + (bytes[start + 3].toInt() and 0xFF)
     }
 
     private fun readString(bytes: ByteArray, start: Int, length: Int): String {
