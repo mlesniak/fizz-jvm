@@ -1,6 +1,6 @@
 # Overview
 
-While showing your basic programming skills by implementing [FizzBuzz](https://en.wikipedia.org/wiki/Fizz_buzz) is nice, I thought *Let's bring it to the next level'. In this repository you'll find a functional JVM implementation which
+While showing your basic programming skills by implementing [FizzBuzz](https://en.wikipedia.org/wiki/Fizz_buzz) is nice, I thought *Let's bring it to the next level*. In this repository you'll find a functional JVM implementation which
 is able to interpret the class file produced by `javac` from the following source code, i.e.
 
     $ cat fizz-buzz/Main.java 
