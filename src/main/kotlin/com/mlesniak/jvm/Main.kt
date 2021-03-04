@@ -5,7 +5,12 @@ package com.mlesniak.jvm
  **/
 class Main {
     fun main(args: Array<String>) {
-        val classFile = ClassFile("fizz-buzz/Main.class")
+        if (args.isEmpty()) {
+            System.err.println("Missing .class file name")
+            return
+        }
+
+        val classFile = ClassFile(args[0])
         val jvm = Interpreter(classFile)
         jvm.run()
     }
